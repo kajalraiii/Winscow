@@ -1,0 +1,62 @@
+
+import psutil
+import logging
+import schedule
+import time
+
+CPU_THRESHOLD = 80
+MEMORY_THRESHOLD = 80
+DISK_THRESHOLD = 90
+MAX_PROCESSES = 300
+
+logging.basicConfig(filename='system_health.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+def check_cpu():
+    try:
+        cpu_percent = psutil.cpu_percent(interval=1)
+        if cpu_percent > CPU_THRESHOLD:
+            logging.info(f"High CPU usage detected: {cpu_percent}%")
+    except Exception as e:
+        logging.error(f"Error while checking CPU usage: {e}")
+
+def check_memory():
+    try:
+        memory_percent = psutil.virtual_memory().percent
+        if memory_percent > MEMORY_THRESHOLD:
+            logging.info(f"High memory usage detected: {memory_percent}%")
+    except Exception as e:
+        logging.error(f"Error while checking memory usage: {e}")
+
+def check_disk():
+    try:
+        disk_percent = psutil.disk_usage('/').percent
+        if disk_percent > DISK_THRESHOLD:
+            logging.info(f"High disk usage detected: {disk_percent}%")
+    except Exception as e:
+        logging.error(f"Error while checking disk usage: {e}")
+
+def check_processes():
+    try:
+        processes_count = len(psutil.pids())
+        if processes_count > MAX_PROCESSES:
+            logging.info(f"High number of processes running: {processes_count}")
+    except Exception as e:
+        logging.error(f"Error while checking number of processes: {e}")
+
+def job():
+    try:
+        check_cpu()
+        check_memory()
+        check_disk()
+        check_processes()
+    except Exception as e:
+        logging.error(f"Error in job function: {e}")
+
+def main():
+    schedule.every(5).minutes.do(job)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()
