@@ -1,0 +1,26 @@
+import requests
+import time
+
+def check_application_status(url):
+    try:
+        response = requests.get(url)
+        # Check if the status code indicates success (2xx)
+        if response.status_code >= 200 and response.status_code < 300:
+            return 'up'
+        else:
+            return 'down'
+    except requests.RequestException:
+        # If an exception occurs (e.g., connection error), consider it as 'down'
+        return 'down'
+
+if __name__ == '__main__':
+    # Example usage:
+    application_url = 'http://example.com'  # Replace with your application URL
+    check_interval = 60  # Check interval in seconds (e.g., every minute)
+
+    while True:
+        status = check_application_status(application_url)
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S')
+        print(f'{current_time} Application status: {status}')
+        
+        time.sleep(check_interval)
